@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import { Document, Page } from "react-pdf";
 import { pdfjs } from "react-pdf";
 
-// Use the local worker file from the public folder
-pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
+// Set up PDF worker
+pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
 
 function PdfViewer() {
   const [isDragging, setIsDragging] = useState(false);
   const [pdfFile, setPdfFile] = useState(null);
-  const [pdfUrl, setPdfUrl] = useState(null); // To store the actual URL of the PDF
+  const [pdfUrl, setPdfUrl] = useState(null);
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
 
@@ -37,7 +37,7 @@ function PdfViewer() {
     const file = e.dataTransfer.files[0];
     if (file && file.type === "application/pdf") {
       setPdfFile(file);
-      uploadFile(file); // Upload the file and get the URL
+      uploadFile(file);
     } else {
       alert("Please drop a valid PDF file.");
     }
@@ -47,16 +47,16 @@ function PdfViewer() {
     const file = e.target.files[0];
     if (file && file.type === "application/pdf") {
       setPdfFile(file);
-      uploadFile(file); // Upload the file and get the URL
+      uploadFile(file);
     } else {
       alert("Please select a valid PDF file.");
     }
   };
 
-  // Simulated file upload (replace with your own method)
   const uploadFile = (file) => {
-    const fileUrl = URL.createObjectURL(file); // In real use, replace this with an actual URL from cloud storage
-    setPdfUrl(fileUrl); // Set the PDF URL
+    const fileUrl = URL.createObjectURL(file);
+    setPdfUrl(fileUrl);
+    setPageNumber(1); // Reset to first page
   };
 
   const onLoadSuccess = ({ numPages }) => {
@@ -65,12 +65,13 @@ function PdfViewer() {
 
   return (
     <div className="full-screen bg-gray-100 overflow-hidden min-h-screen">
+      {/* Header */}
       <section className="w-full">
         <header className="bg-white shadow-md border-b border-gray-200">
           <div className="w-full sm:px-6 lg:px-8 xl:px-12">
             <div className="flex items-center justify-between h-16 lg:h-[72px]">
               <div className="flex items-center flex-shrink-0">
-                <a href="#" title="" className="inline-flex">
+                <a href="#" className="inline-flex">
                   <h2 className="text-black text-lg font-semibold">Pdf Viewer</h2>
                 </a>
                 <div className="hidden lg:flex lg:ml-10 lg:space-x-6">
@@ -85,6 +86,7 @@ function PdfViewer() {
         </header>
       </section>
 
+      {/* Upload Section */}
       <section className="p-6 flex flex-col items-center justify-center text-center mt-16">
         <h2 className="text-3xl font-bold text-black mb-2">Pdf Viewer App</h2>
         <p className="text-gray-600 mb-8 text-lg">
@@ -120,18 +122,12 @@ function PdfViewer() {
           />
         </div>
 
+        {/* PDF Viewer */}
         {pdfUrl && (
           <div className="mt-8 w-full max-w-4xl overflow-x-auto">
-            <div className="flex">
-              <Document
-                file={pdfUrl}
-                onLoadSuccess={onLoadSuccess}
-              >
-                {[...Array(numPages)].map((_, index) => (
-                  <Page key={index} pageNumber={index + 1} />
-                ))}
-              </Document>
-            </div>
+            <Document file={pdfUrl} onLoadSuccess={onLoadSuccess}>
+              <Page pageNumber={pageNumber} />
+            </Document>
 
             <div className="mt-4 flex justify-between">
               <button
@@ -141,6 +137,9 @@ function PdfViewer() {
               >
                 Previous
               </button>
+              <span className="text-lg text-gray-700 self-center">
+                Page {pageNumber} of {numPages}
+              </span>
               <button
                 onClick={() => setPageNumber(pageNumber + 1)}
                 disabled={pageNumber >= numPages}
@@ -153,6 +152,7 @@ function PdfViewer() {
         )}
       </section>
 
+      {/* Footer */}
       <footer style={{ bottom: -350, position: "relative" }} className="mt-auto py-4 bg-white text-center border-t border-gray-200 text-gray-600 text-sm">
         © pdfViewer 2025 ® All Rights Reserved
       </footer>

@@ -1,13 +1,16 @@
-import React from 'react';
-import PdfViewer from './routes/PdfViewer';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import './App.css';
 
-const App = () => {
-  return (
-    <div className="app-container">
-      <PdfViewer />
-    </div>
+import PdfViewer from "./routes/PdfViewer";
+
+function App() {
+  return(
+      <Router>
+        <Routes>
+          <Route path="/" element={<PdfViewer />} />
+        </Routes>
+      </Router>
   );
-};
+}
 
 export default App;
