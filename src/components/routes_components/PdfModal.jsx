@@ -14,37 +14,45 @@ const PdfModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+      <div className="relative w-[90%] max-w-6xl h-[90%] bg-gray-100 rounded-2xl shadow-2xl p-6 flex flex-col">
+        {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-black font-bold text-xl"
+          className="absolute top-4 right-4 text-white bg-black/50 hover:bg-black/80 rounded-full w-10 h-10 flex items-center justify-center text-xl font-bold transition"
         >
-          X
+          &times;
         </button>
-        <PdfDisplay
-          pdfUrl={pdfUrl}
-          pageNumber={pageNumber}
-          onLoadSuccess={onLoadSuccess}
-          customTextRenderer={customTextRenderer}
-        />
-        <div className="mt-4 flex justify-between">
+
+        {/* PDF Display */}
+        <div className="flex-1 overflow-auto rounded-md bg-white shadow-inner p-4 border">
+          <PdfDisplay
+            pdfUrl={pdfUrl}
+            pageNumber={pageNumber}
+            onLoadSuccess={onLoadSuccess}
+            customTextRenderer={customTextRenderer}
+          />
+        </div>
+
+        {/* Navigation */}
+        <div className="mt-4 flex justify-between items-center text-gray-700 text-sm sm:text-base">
           <button
             onClick={() => setPageNumber(pageNumber - 1)}
             disabled={pageNumber <= 1}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg disabled:bg-gray-300"
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition"
           >
-            Previous
+            ◀ Previous
           </button>
-          <span className="text-lg text-gray-700 self-center">
-            Page {pageNumber} of {numPages}
+          <span className="mx-4 font-medium">
+            Page <span className="text-indigo-600">{pageNumber}</span> of{" "}
+            <span className="text-indigo-600">{numPages}</span>
           </span>
           <button
             onClick={() => setPageNumber(pageNumber + 1)}
             disabled={pageNumber >= numPages}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg disabled:bg-gray-300"
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition"
           >
-            Next
+            Next ▶
           </button>
         </div>
       </div>

@@ -162,9 +162,10 @@ function PdfViewer() {
         {uploadedPdfs.length > 0 && (
           <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {uploadedPdfs.map((pdf, index) => (
-              <div key={index} className="border p-4 rounded-lg shadow-lg bg-white cursor-pointer" onClick={() => openModal(pdf.url)}>
-                <h3 className="text-xl font-semibold text-gray-800">{pdf.name}</h3>
-              </div>
+             <div key={index} className="border p-4 rounded-lg shadow-lg bg-white cursor-pointer" onClick={() => openModal(pdf.url)}>
+               <h3 className="text-xl font-semibold text-gray-800">{pdf.name}</h3>
+             </div>
+
             ))}
           </div>
         )}
