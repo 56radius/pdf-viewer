@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Document, Page, pdfjs } from "react-pdf";
+import { pdfjs } from "react-pdf";
+import PdfModal from "../components/routes_components/PdfModal";
 
 // Set up PDF worker
 pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
@@ -10,8 +11,11 @@ function PdfViewer() {
   const [pdfUrl, setPdfUrl] = useState(null);
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
-  const [searchTerm, setSearchTerm] = useState(""); // 🔍 NEW
-  const [searchActive, setSearchActive] = useState(false); // ✅ NEW
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchActive, setSearchActive] = useState(false);
+  const [uploadedPdfs, setUploadedPdfs] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentPdfUrl, setCurrentPdfUrl] = useState(null);
 
   const handleDragEnter = (e) => {
     e.preventDefault();
@@ -56,6 +60,7 @@ function PdfViewer() {
   const uploadFile = (file) => {
     const fileUrl = URL.createObjectURL(file);
     setPdfUrl(fileUrl);
+    setUploadedPdfs([...uploadedPdfs, { name: file.name, url: fileUrl }]);
     setPageNumber(1);
   };
 
@@ -63,12 +68,9 @@ function PdfViewer() {
     setNumPages(numPages);
   };
 
-  // ✨ Custom highlight for matched text
   const customTextRenderer = (textItem) => {
     if (!searchTerm || !searchActive) return textItem.str;
-
     const parts = textItem.str.split(new RegExp(`(${searchTerm})`, "gi"));
-
     return (
       <>
         {parts.map((part, i) =>
@@ -84,9 +86,20 @@ function PdfViewer() {
     );
   };
 
+  const openModal = (url) => {
+    setCurrentPdfUrl(url);
+    setIsModalOpen(true);
+    setSearchActive(false);
+    setPageNumber(1);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setCurrentPdfUrl(null);
+  };
+
   return (
     <div className="full-screen bg-gray-100 overflow-hidden min-h-screen">
-      {/* Header */}
       <section className="w-full">
         <header className="bg-white shadow-md border-b border-gray-200">
           <div className="w-full sm:px-6 lg:px-8 xl:px-12">
@@ -96,7 +109,6 @@ function PdfViewer() {
                   <h2 className="text-black text-lg font-semibold">Pdf Viewer</h2>
                 </a>
               </div>
-              {/* 🔍 Search Input */}
               {pdfUrl && (
                 <div className="flex items-center space-x-2">
                   <input
@@ -119,12 +131,10 @@ function PdfViewer() {
         </header>
       </section>
 
-      {/* Upload Section */}
+      {/* Upload */}
       <section className="p-6 flex flex-col items-center justify-center text-center mt-16">
         <h2 className="text-3xl font-bold text-black mb-2">Pdf Viewer App</h2>
-        <p className="text-gray-600 mb-8 text-lg">
-          View pdf in seconds. Easily adjust orientation and margins.
-        </p>
+        <p className="text-gray-600 mb-8 text-lg">View pdf in seconds. Easily adjust orientation and margins.</p>
 
         <div
           onDragEnter={handleDragEnter}
@@ -132,7 +142,7 @@ function PdfViewer() {
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           className={`transition-all duration-300 w-full max-w-md p-10 rounded-xl border-2 border-dashed bg-white flex flex-col items-center justify-center cursor-pointer
-            ${isDragging ? "border-indigo-600 bg-indigo-50 scale-105 shadow-xl" : "border-gray-300 hover:shadow-lg"}`}
+          ${isDragging ? "border-indigo-600 bg-indigo-50 scale-105 shadow-xl" : "border-gray-300 hover:shadow-lg"}`}
         >
           <svg className="w-12 h-12 text-indigo-500 mb-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -146,47 +156,36 @@ function PdfViewer() {
           >
             Select Pdf File
           </button>
-          <input
-            id="file-input"
-            type="file"
-            accept="application/pdf"
-            onChange={handleFileSelect}
-            className="hidden"
-          />
+          <input id="file-input" type="file" accept="application/pdf" onChange={handleFileSelect} className="hidden" />
         </div>
 
-        {/* PDF Viewer */}
-        {pdfUrl && (
-          <div className="mt-8 w-full max-w-4xl overflow-x-auto">
-            <Document file={pdfUrl} onLoadSuccess={onLoadSuccess}>
-              <Page pageNumber={pageNumber} customTextRenderer={customTextRenderer} />
-            </Document>
-
-            <div className="mt-4 flex justify-between">
-              <button
-                onClick={() => setPageNumber(pageNumber - 1)}
-                disabled={pageNumber <= 1}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg disabled:bg-gray-300"
-              >
-                Previous
-              </button>
-              <span className="text-lg text-gray-700 self-center">
-                Page {pageNumber} of {numPages}
-              </span>
-              <button
-                onClick={() => setPageNumber(pageNumber + 1)}
-                disabled={pageNumber >= numPages}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg disabled:bg-gray-300"
-              >
-                Next
-              </button>
-            </div>
+        {uploadedPdfs.length > 0 && (
+          <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {uploadedPdfs.map((pdf, index) => (
+              <div key={index} className="border p-4 rounded-lg shadow-lg bg-white cursor-pointer" onClick={() => openModal(pdf.url)}>
+                <h3 className="text-xl font-semibold text-gray-800">{pdf.name}</h3>
+              </div>
+            ))}
           </div>
         )}
       </section>
 
-      {/* Footer */}
-      <footer style={{ bottom: -350, position: "relative" }} className="mt-auto py-4 bg-white text-center border-t border-gray-200 text-gray-600 text-sm">
+      {/* Modal Component */}
+      <PdfModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        pdfUrl={currentPdfUrl}
+        pageNumber={pageNumber}
+        setPageNumber={setPageNumber}
+        numPages={numPages}
+        onLoadSuccess={onLoadSuccess}
+        customTextRenderer={customTextRenderer}
+      />
+
+      <footer
+        style={{ bottom: -350, position: "relative" }}
+        className="mt-auto py-4 bg-white text-center border-t border-gray-200 text-gray-600 text-sm"
+      >
         © pdfViewer 2025 ® All Rights Reserved
       </footer>
     </div>
