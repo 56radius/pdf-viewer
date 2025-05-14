@@ -1,20 +1,46 @@
 import React from "react";
 import { Document, Page } from "react-pdf";
 
-function PdfDisplay({ pdfUrl, pageNumber, onLoadSuccess, customTextRenderer }) {
+function PdfDisplay({ pdfUrl, pageNumber, onLoadSuccess, searchTerm }) {
+  const customTextRenderer = ({ str }) => {
+    if (!searchTerm || searchTerm.trim() === "") return str;
+
+    const parts = str.split(new RegExp(`(${searchTerm})`, "gi"));
+
+    return (
+      <>
+        {parts.map((part, index) =>
+          part.toLowerCase() === searchTerm.toLowerCase() ? (
+            <mark
+              key={index}
+              style={{
+                backgroundColor: "yellow",
+                color: "black",
+                padding: "0 2px",
+                borderRadius: "4px",
+              }}
+            >
+              {part}
+            </mark>
+          ) : (
+            <span key={index}>{part}</span>
+          )
+        )}
+      </>
+    );
+  };
+
   return (
-    <div className="flex justify-center items-start w-full h-full overflow-auto bg-gray-200 p-4 rounded-lg">
-      <div className="bg-white shadow-xl rounded-md p-4 max-w-[900px] w-full">
-        <Document file={pdfUrl} onLoadSuccess={onLoadSuccess}>
-          <Page
-            pageNumber={pageNumber}
-            customTextRenderer={customTextRenderer}
-            renderAnnotationLayer={false}
-            renderTextLayer={true}
-            width={800}
-          />
-        </Document>
-      </div>
+    <div className="flex justify-center">
+      <Document file={pdfUrl} onLoadSuccess={onLoadSuccess}>
+        <Page
+          pageNumber={pageNumber}
+          width={900}
+          renderAnnotationLayer={false}
+          renderTextLayer={true}
+          customTextRenderer={customTextRenderer}
+        />
+      </Document>
     </div>
   );
 }

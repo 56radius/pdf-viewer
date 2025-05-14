@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import PdfDisplay from "../routes_components/PdfDisplay";
 
 const PdfModal = ({
@@ -9,8 +9,9 @@ const PdfModal = ({
   numPages,
   setPageNumber,
   onLoadSuccess,
-  customTextRenderer,
 }) => {
+  const [searchTerm, setSearchTerm] = useState("");
+
   if (!isOpen) return null;
 
   return (
@@ -24,13 +25,24 @@ const PdfModal = ({
           &times;
         </button>
 
+        {/* Search Input */}
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Search text..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+
         {/* PDF Display */}
         <div className="flex-1 overflow-auto rounded-md bg-white shadow-inner p-4 border">
           <PdfDisplay
             pdfUrl={pdfUrl}
             pageNumber={pageNumber}
             onLoadSuccess={onLoadSuccess}
-            customTextRenderer={customTextRenderer}
+            searchTerm={searchTerm}
           />
         </div>
 
