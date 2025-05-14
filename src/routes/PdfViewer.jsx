@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { Document, Page } from "react-pdf";
-import { pdfjs } from "react-pdf";
+import { Document, Page, pdfjs } from "react-pdf";
 
 // Set up PDF worker
 pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
@@ -11,6 +10,8 @@ function PdfViewer() {
   const [pdfUrl, setPdfUrl] = useState(null);
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
+  const [searchTerm, setSearchTerm] = useState(""); // 🔍 NEW
+  const [searchActive, setSearchActive] = useState(false); // ✅ NEW
 
   const handleDragEnter = (e) => {
     e.preventDefault();
@@ -33,7 +34,6 @@ function PdfViewer() {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-
     const file = e.dataTransfer.files[0];
     if (file && file.type === "application/pdf") {
       setPdfFile(file);
@@ -56,11 +56,32 @@ function PdfViewer() {
   const uploadFile = (file) => {
     const fileUrl = URL.createObjectURL(file);
     setPdfUrl(fileUrl);
-    setPageNumber(1); // Reset to first page
+    setPageNumber(1);
   };
 
   const onLoadSuccess = ({ numPages }) => {
     setNumPages(numPages);
+  };
+
+  // ✨ Custom highlight for matched text
+  const customTextRenderer = (textItem) => {
+    if (!searchTerm || !searchActive) return textItem.str;
+
+    const parts = textItem.str.split(new RegExp(`(${searchTerm})`, "gi"));
+
+    return (
+      <>
+        {parts.map((part, i) =>
+          part.toLowerCase() === searchTerm.toLowerCase() ? (
+            <mark key={i} style={{ backgroundColor: "yellow", padding: "1px 2px" }}>
+              {part}
+            </mark>
+          ) : (
+            part
+          )
+        )}
+      </>
+    );
   };
 
   return (
@@ -74,13 +95,25 @@ function PdfViewer() {
                 <a href="#" className="inline-flex">
                   <h2 className="text-black text-lg font-semibold">Pdf Viewer</h2>
                 </a>
-                <div className="hidden lg:flex lg:ml-10 lg:space-x-6">
-                  <a href="#" className="text-base font-medium text-gray-700 hover:text-black transition-all">Merge Pdf</a>
-                  <a href="#" className="text-base font-medium text-gray-700 hover:text-black transition-all">Split Pdf</a>
-                  <a href="#" className="text-base font-medium text-gray-700 hover:text-black transition-all">Compress Pdf</a>
-                  <a href="#" className="text-base font-medium text-gray-700 hover:text-black transition-all">Scan to PDF</a>
-                </div>
               </div>
+              {/* 🔍 Search Input */}
+              {pdfUrl && (
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    placeholder="Search text..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="border border-gray-300 rounded px-2 py-1 text-sm"
+                  />
+                  <button
+                    onClick={() => setSearchActive(true)}
+                    className="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm"
+                  >
+                    Search
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </header>
@@ -126,7 +159,7 @@ function PdfViewer() {
         {pdfUrl && (
           <div className="mt-8 w-full max-w-4xl overflow-x-auto">
             <Document file={pdfUrl} onLoadSuccess={onLoadSuccess}>
-              <Page pageNumber={pageNumber} />
+              <Page pageNumber={pageNumber} customTextRenderer={customTextRenderer} />
             </Document>
 
             <div className="mt-4 flex justify-between">
