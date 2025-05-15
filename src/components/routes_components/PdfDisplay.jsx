@@ -1,103 +1,65 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Document, Page } from "react-pdf";
+import "react-pdf/dist/Page/AnnotationLayer.css";
+import "react-pdf/dist/Page/TextLayer.css";
 
 function PdfDisplay({ pdfUrl, pageNumber, onLoadSuccess, searchTerm }) {
-  const [textItems, setTextItems] = useState([]);
   const [pageDimensions, setPageDimensions] = useState({ width: 0, height: 0 });
   const containerRef = useRef();
+  const textLayerRef = useRef();
 
-  // Called when Page text is loaded
-  function onGetTextSuccess(items) {
-    setTextItems(items);
-  }
-
-  // Called when page is rendered to get dimensions
   function onPageRenderSuccess(page) {
     const { width, height } = page.getViewport({ scale: 1 });
     setPageDimensions({ width, height });
   }
 
-  // Find matches of searchTerm and return array of highlight styles (positions)
-  const highlights = React.useMemo(() => {
-    if (!searchTerm || !textItems.length) return [];
+  // Highlight function
+  useEffect(() => {
+    if (!searchTerm) return;
 
-    const term = searchTerm.toLowerCase();
-    const matches = [];
+    const textLayer = containerRef.current?.querySelector(".react-pdf__Page__textContent");
+    if (!textLayer) return;
 
-    textItems.forEach((item) => {
-      const str = item.str.toLowerCase();
-      let startIndex = 0;
-      while (true) {
-        const index = str.indexOf(term, startIndex);
-        if (index === -1) break;
-
-        // Calculate approximate position and width of matched substring inside item
-        // Here we approximate by character width since pdf.js text items don't have per-char positions
-        const charWidth = item.width / item.str.length;
-        const highlightLeft = item.transform[4] + charWidth * index;
-        const highlightWidth = charWidth * term.length;
-
-        matches.push({
-          top: item.transform[5] - item.height,
-          left: highlightLeft,
-          width: highlightWidth,
-          height: item.height,
-        });
-
-        startIndex = index + term.length;
+    // Clear old highlights
+    textLayer.querySelectorAll("span").forEach((span) => {
+      const original = span.getAttribute("data-original-text");
+      if (original) {
+        span.innerHTML = original;
       }
     });
 
-    return matches;
-  }, [searchTerm, textItems]);
+    // Highlight new terms
+    const regex = new RegExp(`(${searchTerm})`, "gi");
+
+    textLayer.querySelectorAll("span").forEach((span) => {
+      const text = span.textContent;
+      if (!text) return;
+
+      const markedText = text.replace(regex, `<mark style="background: yellow; color: black;">$1</mark>`);
+      if (text !== markedText) {
+        span.setAttribute("data-original-text", text); // store original
+        span.innerHTML = markedText;
+      }
+    });
+  }, [searchTerm, pageNumber]);
 
   return (
     <div
       ref={containerRef}
       style={{
         position: "relative",
-        width: pageDimensions.width,
-        height: pageDimensions.height,
+        width: pageDimensions.width || 600,
+        height: pageDimensions.height || "auto",
         margin: "auto",
       }}
     >
       <Document file={pdfUrl} onLoadSuccess={onLoadSuccess}>
         <Page
           pageNumber={pageNumber}
-          onGetTextSuccess={onGetTextSuccess}
           onRenderSuccess={onPageRenderSuccess}
           width={600}
         />
       </Document>
-
-      {/* Highlights Layer */}
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          pointerEvents: "none",
-          width: pageDimensions.width,
-          height: pageDimensions.height,
-        }}
-      >
-        {highlights.map((hl, i) => (
-          <div
-            key={i}
-            style={{
-              position: "absolute",
-              backgroundColor: "yellow",
-              opacity: 0.4,
-              top: hl.top,
-              left: hl.left,
-              width: hl.width,
-              height: hl.height,
-              pointerEvents: "none",
-              borderRadius: 2,
-            }}
-          />
-        ))}
-      </div>
     </div>
   );
 }

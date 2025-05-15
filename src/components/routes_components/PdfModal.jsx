@@ -12,27 +12,6 @@ const PdfModal = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Custom text renderer to highlight searched words
-  const customTextRenderer = (textItem) => {
-    if (!searchTerm) return textItem.str;
-
-    const regex = new RegExp(`(${searchTerm})`, "gi");
-    const parts = textItem.str.split(regex);
-
-    return parts.map((part, index) =>
-      regex.test(part) ? (
-        <mark
-          key={index}
-          style={{ backgroundColor: "yellow", color: "black", padding: 0 }}
-        >
-          {part}
-        </mark>
-      ) : (
-        part
-      )
-    );
-  };
-
   if (!isOpen) return null;
 
   return (
@@ -63,7 +42,7 @@ const PdfModal = ({
             pdfUrl={pdfUrl}
             pageNumber={pageNumber}
             onLoadSuccess={onLoadSuccess}
-            customTextRenderer={customTextRenderer}
+            searchTerm={searchTerm}
           />
         </div>
 
