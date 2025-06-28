@@ -1,0 +1,21 @@
+directories:
+  output: release
+  buildResources: build
+appId: com.pdfviewer.app
+productName: PdfViewer
+copyright: © 2025 PdfViewer
+files:
+  - filter:
+      - dist
+      - src/main
+      - package.json
+asar: true
+extraMetadata:
+  main: src/main/index.js
+mac:
+  target: dmg
+win:
+  target: nsis
+linux:
+  target: AppImage
+electronVersion: 36.1.0
