@@ -41,7 +41,7 @@ A modern React-based PDF viewer application that allows you to:
 
 ## 🧪 Getting Started
 
-### 🔧 Installation
+### Installation
 
 ```bash
 git clone https://github.com/yourusername/pdf-viewer-app.git
@@ -49,12 +49,7 @@ cd pdf-viewer-app
 npm install
 
 
-
-
-
-
-
-## Steps to install it
+## Steps to create your own  concurrent vite and electron project
 # React + Vite
 This stack contains full out template code written by Merit Mohammed 
 
