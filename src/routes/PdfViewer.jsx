@@ -148,7 +148,7 @@ function PdfViewer() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
           </svg>
           <p className="text-gray-600">
-            {isDragging ? "Drop your file here" : "Select file or drop PDF here"}
+            {isDragging ? "Drop your file here" : "Upload file or drop PDF here"}
           </p>
           <button
             onClick={() => document.getElementById("file-input").click()}
