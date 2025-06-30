@@ -5,7 +5,7 @@
   "author": "56radius",
   "private": true,
   "type": "module",
-  "main": "src/main/index.js",
+  "main": "electron-main.cjs",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
