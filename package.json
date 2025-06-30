@@ -5,7 +5,7 @@
   "author": "56radius",
   "private": true,
   "type": "module",
-  "main": "src/main/index.mjs",
+  "main": "src/main/index.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
+    "@tailwindcss/oxide": "^4.1.11",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react-swc": "^3.8.0",
